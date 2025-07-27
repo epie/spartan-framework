@@ -19,10 +19,14 @@ def mock_stream_logger():
 
 @pytest.fixture
 def both_logger(monkeypatch, mock_file_logger, mock_stream_logger):
-    with patch(
-        "app.helpers.logger.both.FileLogger", return_value=mock_file_logger
-    ), patch(
-        "app.helpers.logger.both.StreamLogger", return_value=mock_stream_logger
+    with (
+        patch(
+            "app.helpers.logger.both.FileLogger", return_value=mock_file_logger
+        ),
+        patch(
+            "app.helpers.logger.both.StreamLogger",
+            return_value=mock_stream_logger,
+        ),
     ):
         logger = BothLogger(service_name="test-service", level="DEBUG")
         return logger
@@ -120,9 +124,10 @@ def test_exception_calls_both_loggers(
 
 
 def test_logger_init_sets_attributes(monkeypatch):
-    with patch("app.helpers.logger.both.FileLogger") as file_patch, patch(
-        "app.helpers.logger.both.StreamLogger"
-    ) as stream_patch:
+    with (
+        patch("app.helpers.logger.both.FileLogger") as file_patch,
+        patch("app.helpers.logger.both.StreamLogger") as stream_patch,
+    ):
         logger = BothLogger(service_name="svc", level="WARNING")
         assert logger.level == "WARNING"
         assert logger.service_name == "svc"

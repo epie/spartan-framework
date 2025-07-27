@@ -45,9 +45,10 @@ def test_write_trace(tracer):
     }
     trace_message = json.dumps(trace_entry, default=str)
 
-    with patch("builtins.open", mock_open()) as mock_file, patch(
-        "app.helpers.tracer.local.datetime"
-    ) as mock_datetime:
+    with (
+        patch("builtins.open", mock_open()) as mock_file,
+        patch("app.helpers.tracer.local.datetime") as mock_datetime,
+    ):
         mock_datetime.now.return_value.strftime.return_value = (
             "2023-01-01 00:00:00"
         )

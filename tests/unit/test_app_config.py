@@ -1,7 +1,8 @@
 import os
-from unittest.mock import patch, MagicMock
+from unittest.mock import patch
 
 from pydantic import ConfigDict
+
 from app.helpers.environment import EnvironmentVariables, env
 
 
@@ -29,7 +30,7 @@ def test_settings_loads_env_vars():
         "DB_PASSWORD": "password",
         "STORAGE_TYPE": "s3",
         "STORAGE_BUCKET": "my-test-bucket",
-        "STORAGE_PATH": "custom/storage/path"
+        "STORAGE_PATH": "custom/storage/path",
     }
 
     # Apply environment variables
@@ -89,7 +90,7 @@ def test_get_settings_cached():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
+        "DB_PASSWORD": "test",
     }
 
     for key, value in test_env_vars.items():
@@ -128,7 +129,7 @@ def test_env_function_with_variable_name():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
+        "DB_PASSWORD": "test",
     }
 
     for key, value in test_env_vars.items():
@@ -171,7 +172,7 @@ def test_db_port_validator():
         "DB_HOST": "localhost",
         "DB_NAME": "testdb",
         "DB_USERNAME": "user",
-        "DB_PASSWORD": "password"
+        "DB_PASSWORD": "password",
     }
 
     # Test with valid port number
@@ -217,7 +218,7 @@ def test_optional_fields_defaults():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
+        "DB_PASSWORD": "test",
     }
 
     for key, value in test_env_vars.items():
@@ -260,7 +261,7 @@ def test_storage_configuration():
         "DB_PASSWORD": "test",
         "STORAGE_TYPE": "s3",
         "STORAGE_BUCKET": "my-bucket",
-        "STORAGE_PATH": "custom/path"
+        "STORAGE_PATH": "custom/path",
     }
 
     for key, value in test_env_vars.items():
@@ -295,7 +296,7 @@ def test_storage_defaults_when_not_provided():
         "DB_HOST": "localhost",
         "DB_NAME": "test.db",
         "DB_USERNAME": "test",
-        "DB_PASSWORD": "test"
+        "DB_PASSWORD": "test",
         # Note: No STORAGE_* variables provided
     }
 
@@ -312,7 +313,9 @@ def test_storage_defaults_when_not_provided():
 
     try:
         # Create settings with env_file=None to avoid .env loading
-        with patch.object(EnvironmentVariables, 'model_config', ConfigDict(env_file=None)):
+        with patch.object(
+            EnvironmentVariables, "model_config", ConfigDict(env_file=None)
+        ):
             settings = EnvironmentVariables()
 
             # Test default storage values (without .env interference)

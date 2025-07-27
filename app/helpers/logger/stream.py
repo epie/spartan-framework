@@ -29,7 +29,7 @@ class StreamLogger(BaseLogger):
         self.logger = logging.getLogger(f"{service_name}-stream")
         handler = logging.StreamHandler(sys.stdout)
         formatter = logging.Formatter(
-            f"%(message)s"
+            "%(message)s"
         )  # We'll handle formatting ourselves
         handler.setFormatter(formatter)
         self.logger.handlers = []  # Remove any existing handlers

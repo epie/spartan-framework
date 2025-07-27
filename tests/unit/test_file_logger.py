@@ -92,7 +92,7 @@ def test_exception_logging(file_logger, temp_log_dir):
 
 
 def test_directory_creation(temp_log_dir):
-    logger = FileLogger(service_name="test-service", log_dir=temp_log_dir)
+    FileLogger(service_name="test-service", log_dir=temp_log_dir)
     assert os.path.exists(temp_log_dir)
 
 

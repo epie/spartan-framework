@@ -17,27 +17,27 @@ class EnvironmentVariables(BaseSettings):
         APP_DEBUG (bool): Flag to enable or disable debug mode.
         APP_MAINTENANCE (bool): Flag to enable or disable maintenance mode. Defaults to False.
         ALLOWED_ORIGINS (str): Comma-separated list of allowed CORS origins.
-        LOG_LEVEL (str): The logging level (e.g., INFO, DEBUG).
-        LOG_CHANNEL (str): The logging channel to use.
+        LOG_LEVEL (str): Logging level (e.g., INFO, DEBUG).
+        LOG_CHANNEL (str): Logging channel or handler.
         LOG_DIR (str): Directory path for storing log files.
-        DB_TYPE (str): The type of database (e.g., postgres, mysql).
-        DB_DRIVER (str): The database driver to use.
-        DB_HOST (str): The database host address.
-        DB_PORT (Optional[int]): The database port. Defaults to None if not provided.
-        DB_NAME (str): The name of the database.
-        DB_USERNAME (str): The database username.
-        DB_PASSWORD (str): The database password.
-        DB_SSL_CA (Optional[str]): Path to the SSL CA certificate for the database. Optional.
-        DB_SSL_VERIFY_CERT (Optional[bool]): Whether to verify the database SSL certificate. Optional.
-        STORAGE_TYPE (str): The storage type to use. Defaults to "local".
-        STORAGE_BUCKET (Optional[str]): The storage bucket name. Optional.
-        STORAGE_PATH (str): The storage path. Defaults to "storage/core".
+        DB_TYPE (str): Database type (e.g., postgres, mysql).
+        DB_DRIVER (str): Database driver.
+        DB_HOST (str): Database host address.
+        DB_PORT (Optional[int]): Database port number. Defaults to None.
+        DB_NAME (str): Database name.
+        DB_USERNAME (str): Database username.
+        DB_PASSWORD (str): Database password.
+        DB_SSL_CA (Optional[str]): Path to the SSL CA certificate for the database. Defaults to None.
+        DB_SSL_VERIFY_CERT (Optional[bool]): Whether to verify the database SSL certificate. Defaults to None.
+        STORAGE_ENABLED (bool): Flag to enable or disable storage. Defaults to False.
+        STORAGE_TYPE (str): Type of storage backend. Defaults to "local".
+        STORAGE_BUCKET (Optional[str]): Storage bucket name (if applicable). Defaults to None.
+        STORAGE_PATH (str): Path for storage. Defaults to "storage/core".
     Class Attributes:
-        model_config: Configuration for environment file loading.
+        model_config (ConfigDict): Configuration for environment file and encoding.
     Methods:
         default_db_port(cls, v): Validator to ensure DB_PORT is an integer or None.
     """
-
 
     APP_NAME: str
     APP_ENVIRONMENT: str
@@ -59,9 +59,16 @@ class EnvironmentVariables(BaseSettings):
     DB_SSL_CA: Optional[str] = None
     DB_SSL_VERIFY_CERT: Optional[bool] = None
 
+    STORAGE_ENABLED: bool = False
     STORAGE_TYPE: str = "local"
     STORAGE_BUCKET: Optional[str] = None
     STORAGE_PATH: str = "storage/core"
+
+    DDB_TYPE: Optional[str] = "local"
+    DDB_HOST: Optional[str] = "localhost"
+    DDB_PORT: Optional[int] = 8000
+    DDB_REGION: Optional[str] = "ap-southeast-1"
+    DDB_TABLE_NAME: Optional[str] = "spartan"
 
     model_config = ConfigDict(env_file=".env", env_file_encoding="utf-8")
 

@@ -48,11 +48,10 @@ def test_capture_method(tracer):
 
 
 def test_create_segment(tracer):
-    with patch.object(
-        tracer.tracer, "begin_segment"
-    ) as mock_begin_segment, patch.object(
-        tracer.tracer, "end_segment"
-    ) as mock_end_segment:
+    with (
+        patch.object(tracer.tracer, "begin_segment") as mock_begin_segment,
+        patch.object(tracer.tracer, "end_segment") as mock_end_segment,
+    ):
         with tracer.create_segment("test_segment"):
             pass
         mock_begin_segment.assert_called_once_with("test_segment")
@@ -60,11 +59,12 @@ def test_create_segment(tracer):
 
 
 def test_create_subsegment(tracer):
-    with patch.object(
-        tracer.tracer, "begin_subsegment"
-    ) as mock_begin_subsegment, patch.object(
-        tracer.tracer, "end_subsegment"
-    ) as mock_end_subsegment:
+    with (
+        patch.object(
+            tracer.tracer, "begin_subsegment"
+        ) as mock_begin_subsegment,
+        patch.object(tracer.tracer, "end_subsegment") as mock_end_subsegment,
+    ):
         with tracer.create_subsegment("test_subsegment"):
             pass
         mock_begin_subsegment.assert_called_once_with("test_subsegment")
