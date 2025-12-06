@@ -5,6 +5,7 @@ from cloudevents.http import CloudEvent
 
 from handlers.pubsub import my_processor
 
+
 class SpartanPubSubHandler:
     def __init__(self, processor):
         self.processor = processor
