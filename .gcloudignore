@@ -30,6 +30,4 @@ requirements-dev.txt
 .DS_Store
 .vscode/
 .idea/
-LICENSE
-README.md
 CHANGELOG.md
