@@ -1,20 +1,26 @@
-from handlers.inference import main as inference_main
+import base64
 
-def main(event, context):
-    """Entry point for Google Cloud Functions."""
-    return inference_main(event, context)
+import functions_framework
+from cloudevents.http import CloudEvent
+
+from handlers.pubsub import my_processor
+
+class SpartanPubSubHandler:
+    def __init__(self, processor):
+        self.processor = processor
+
+    def handle(self, cloud_event: CloudEvent):
+        data = cloud_event.data
+        pubsub_message = data.get("message", {})
+        payload = None
+        if "data" in pubsub_message:
+            payload = base64.b64decode(pubsub_message["data"]).decode("utf-8")
+
+        self.processor(payload)
+
+handler = SpartanPubSubHandler(my_processor)
 
 
-if __name__ == "__main__":
-    from app.helpers.context import MockLambdaContext, MockLambdaEvent
-    from app.helpers.logger import get_logger
-
-    logger = get_logger("spartan.inference")
-
-    event = MockLambdaEvent()
-    context = MockLambdaContext()
-
-    try:
-        logger.info("Handler Response", extra={"response": inference_main(event, context)})
-    except Exception as e:
-        logger.exception("Unhandled exception in main", extra={"error": str(e)})
+@functions_framework.cloud_event
+def hello_pubsub(cloud_event: CloudEvent):
+    handler.handle(cloud_event)

@@ -4,16 +4,19 @@ from types import SimpleNamespace
 
 def test_cloudwatch_logger_format_and_redaction(monkeypatch):
     """CloudWatchLogger should use custom formatter to add env/version and redact sensitive fields."""
+
     # Replace the Logger used in the module with a fake implementation
     class FakeHandler:
         def __init__(self):
             class Formatter:
                 def format(self, record):
                     # Original formatter returns JSON with message and extra
-                    return json.dumps({
-                        "message": record.getMessage(),
-                        "extra": getattr(record, "extra", {}),
-                    })
+                    return json.dumps(
+                        {
+                            "message": record.getMessage(),
+                            "extra": getattr(record, "extra", {}),
+                        }
+                    )
 
             self.formatter = Formatter()
 
@@ -78,7 +81,15 @@ def test_cloudwatch_logger_format_and_redaction(monkeypatch):
     import app.services.logging.cloud as cloud_mod
 
     monkeypatch.setattr(cloud_mod, "Logger", FakeLogger)
-    monkeypatch.setattr(cloud_mod, "env", lambda k, d=None: {"APP_ENVIRONMENT": "ci", "APP_VERSION": "9.9.9", "LOG_SAMPLE_RATE": "1.0"}.get(k, d))
+    monkeypatch.setattr(
+        cloud_mod,
+        "env",
+        lambda k, d=None: {
+            "APP_ENVIRONMENT": "ci",
+            "APP_VERSION": "9.9.9",
+            "LOG_SAMPLE_RATE": "1.0",
+        }.get(k, d),
+    )
 
     # Create logger and call info with sensitive data in extra
     from app.services.logging.cloud import CloudWatchLogger
@@ -95,6 +106,7 @@ def test_cloudwatch_logger_format_and_redaction(monkeypatch):
     assert formatted["version"] == "9.9.9"
     # At least one sensitive field should be redacted somewhere in the output
     assert "[REDACTED]" in cw.logger.last
+
     # Non-sensitive field should be present somewhere in the output
     def contains_value(obj, val):
         if isinstance(obj, dict):
@@ -108,12 +120,18 @@ def test_cloudwatch_logger_format_and_redaction(monkeypatch):
 
 def test_cloudwatch_logger_sampling_and_inject(monkeypatch):
     """Sampling should prevent logs when sample_rate is low and inject_lambda_context returns decorator."""
+
     class DummyLogger:
         def __init__(self, *args, **kwargs):
             class H:
                 class F:
                     def format(self, r):
-                        return json.dumps({"message": r.getMessage(), "extra": getattr(r, "extra", {})})
+                        return json.dumps(
+                            {
+                                "message": r.getMessage(),
+                                "extra": getattr(r, "extra", {}),
+                            }
+                        )
 
                 formatter = F()
 
@@ -127,8 +145,17 @@ def test_cloudwatch_logger_sampling_and_inject(monkeypatch):
             return lambda f: f
 
     import app.services.logging.cloud as cloud_mod
+
     monkeypatch.setattr(cloud_mod, "Logger", DummyLogger)
-    monkeypatch.setattr(cloud_mod, "env", lambda k, d=None: {"LOG_SAMPLE_RATE": "0.0", "APP_ENVIRONMENT": "x", "APP_VERSION": "y"}.get(k, d))
+    monkeypatch.setattr(
+        cloud_mod,
+        "env",
+        lambda k, d=None: {
+            "LOG_SAMPLE_RATE": "0.0",
+            "APP_ENVIRONMENT": "x",
+            "APP_VERSION": "y",
+        }.get(k, d),
+    )
 
     from app.services.logging.cloud import CloudWatchLogger
 
