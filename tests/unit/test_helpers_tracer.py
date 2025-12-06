@@ -1,4 +1,3 @@
-import pytest
 from app.helpers.tracer import (
     TracerService,
     capture_lambda_handler,

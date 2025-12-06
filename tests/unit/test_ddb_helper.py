@@ -46,7 +46,9 @@ def test_get_dynamodb_clients_local_environment(mocker):
         describe_table=lambda TableName: {"Table": {"TableStatus": "ACTIVE"}}
     )
 
-    mock_resource = mocker.patch("app.helpers.ddb.boto3.resource", return_value=fake_resource)
+    mock_resource = mocker.patch(
+        "app.helpers.ddb.boto3.resource", return_value=fake_resource
+    )
     mock_client = mocker.patch("app.helpers.ddb.boto3.client", return_value=fake_client)
     mock_logger = mocker.patch("app.helpers.ddb.logger")
 
@@ -86,7 +88,9 @@ def test_get_dynamodb_clients_lambda_environment(mocker):
         describe_table=lambda TableName: {"Table": {"TableStatus": "ACTIVE"}}
     )
 
-    mock_resource = mocker.patch("app.helpers.ddb.boto3.resource", return_value=fake_resource)
+    mock_resource = mocker.patch(
+        "app.helpers.ddb.boto3.resource", return_value=fake_resource
+    )
     mock_client = mocker.patch("app.helpers.ddb.boto3.client", return_value=fake_client)
     mock_logger = mocker.patch("app.helpers.ddb.logger")
 
@@ -128,7 +132,9 @@ def test_get_dynamodb_clients_container_environment(mocker):
         describe_table=lambda TableName: {"Table": {"TableStatus": "ACTIVE"}}
     )
 
-    mock_resource = mocker.patch("app.helpers.ddb.boto3.resource", return_value=fake_resource)
+    mock_resource = mocker.patch(
+        "app.helpers.ddb.boto3.resource", return_value=fake_resource
+    )
     mocker.patch("app.helpers.ddb.boto3.client", return_value=fake_client)
     mock_logger = mocker.patch("app.helpers.ddb.logger")
 
@@ -186,7 +192,10 @@ def test_get_dynamodb_clients_table_not_found(mocker):
 
 
 def test_get_dynamodb_clients_describe_table_error(mocker):
-    """Test DynamoDB client initialization with describe_table error (non-ResourceNotFound)."""
+    """
+    Test DynamoDB client initialization with
+    describe_table error (non-ResourceNotFound).
+    """
     settings = SimpleNamespace(
         DDB_TYPE="local",
         DDB_TABLE_NAME="error_table",
@@ -213,7 +222,7 @@ def test_get_dynamodb_clients_describe_table_error(mocker):
 
     mocker.patch("app.helpers.ddb.boto3.resource", return_value=fake_resource)
     mocker.patch("app.helpers.ddb.boto3.client", return_value=fake_client)
-    mock_logger = mocker.patch("app.helpers.ddb.logger")
+    mocker.patch("app.helpers.ddb.logger")
 
     # Should re-raise non-ResourceNotFoundException errors
     with pytest.raises(ClientError) as exc_info:
@@ -237,7 +246,9 @@ def test_get_dynamodb_clients_connection_error(mocker):
     mocker.patch("app.helpers.ddb.env", return_value=settings)
 
     # Simulate connection error during resource creation
-    mocker.patch("app.helpers.ddb.boto3.resource", side_effect=Exception("Connection failed"))
+    mocker.patch(
+        "app.helpers.ddb.boto3.resource", side_effect=Exception("Connection failed")
+    )
     mock_logger = mocker.patch("app.helpers.ddb.logger")
 
     with pytest.raises(Exception) as exc_info:

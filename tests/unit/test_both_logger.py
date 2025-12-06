@@ -1,5 +1,5 @@
-import pytest
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
+
 from app.services.logging.both import BothLogger, _prettify_extra
 
 
@@ -27,6 +27,7 @@ def test_prettify_extra_redacts_sensitive_data():
 
 def test_prettify_extra_handles_serialization_error():
     """Test prettify extra handles non-serializable data."""
+
     class NonSerializable:
         pass
 
