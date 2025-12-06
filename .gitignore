@@ -179,7 +179,6 @@ Dockerfile
 build.sql
 docker-compose.yml
 
-*.yml
-tinker.py
 .python_version
 .env.*
+tinker.py
