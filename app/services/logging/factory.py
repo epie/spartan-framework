@@ -3,7 +3,6 @@ from typing import Dict, List, Optional, Type
 
 from app.helpers.environment import env
 from app.services.logging.both import BothLogger
-from app.services.logging.cloud import CloudWatchLogger
 from app.services.logging.file import FileLogger
 from app.services.logging.stream import StreamLogger
 
@@ -20,7 +19,6 @@ class LoggerFactory:
     _logger_registry = {
         "stream": StreamLogger,
         "file": FileLogger,
-        "cloud": CloudWatchLogger,
         "both": BothLogger,
         # gcloud is handled separately due to lazy loading
     }
@@ -87,7 +85,7 @@ class LoggerFactory:
         base_params = {"service_name": service_name, "level": level}
 
         # Add sample_rate for loggers that support it
-        if logger_type in ["file", "cloud", "gcloud", "both"]:
+        if logger_type in ["file", "gcloud", "both"]:
             base_params["sample_rate"] = float(env("LOG_SAMPLE_RATE", "1.0"))
 
         return base_params
@@ -110,7 +108,7 @@ class LoggerFactory:
         Args:
             service_name: Name of the service for logging identification
             level: Logging level (DEBUG, INFO, WARNING, ERROR, CRITICAL)
-            logger_type: Type of logger to create (stream, file, cloud, gcloud, both)
+            logger_type: Type of logger to create (stream, file, gcloud, both)
 
         Returns:
             BaseLogger: Configured logger instance
