@@ -55,7 +55,8 @@ class GCloudTracer(BaseTracer):
 
     @contextmanager
     def create_segment(self, name: str, metadata: Optional[Dict[str, Any]] = None):
-        # Real implementation would start and end spans; here we provide a context manager
+        # Real implementation would start and end spans; here we provide
+        # a context manager
         try:
             yield
         finally:

@@ -12,11 +12,11 @@ sys.modules["aws_xray_sdk.core"] = fake_core
 sys.modules["aws_xray_sdk"] = types.ModuleType("aws_xray_sdk")
 sys.modules["aws_xray_sdk"].core = fake_core
 
-import pytest
+import pytest  # noqa: E402
 
-from app.services.tracing.factory import TracerFactory
-from app.services.tracing.gcloud import GCloudTracer
-from app.services.tracing.local import LocalTracer
+from app.services.tracing.factory import TracerFactory  # noqa: E402
+from app.services.tracing.gcloud import GCloudTracer  # noqa: E402
+from app.services.tracing.local import LocalTracer  # noqa: E402
 
 
 def test_env_override_selects_gcloud(monkeypatch):
@@ -68,7 +68,10 @@ def test_invalid_override_raises(monkeypatch):
 
 
 def test_gcloud_tracer_basic_behaviour(monkeypatch):
-    """GCloudTracer should construct when trace_v1 is available and its wrappers should call through."""
+    """
+    GCloudTracer should construct when trace_v1 is available and its
+    wrappers should call through.
+    """
     mod = __import__("app.services.tracing.gcloud", fromlist=["*"])
 
     # Make trace available
@@ -104,8 +107,11 @@ def test_gcloud_tracer_basic_behaviour(monkeypatch):
     assert x == 1
 
 
-def test_tracerservice_delegation(monkeypatch):
-    """TracerService helpers should delegate to the underlying tracer instance."""
+def test_tracerservice_delegation(monkeypatch):  # noqa: C901
+    """
+    TracerService helpers should delegate to the underlying tracer
+    instance.
+    """
     from app.services.tracer import (
         TracerService,
         capture_lambda_handler,

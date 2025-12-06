@@ -54,16 +54,22 @@ def test_database_settings_port_conversion_and_defaults(monkeypatch):
     ds = db_mod.DatabaseSettings()
 
     assert ds.type == "postgres"
-    # Note: DatabaseSettings reads env() directly, which returns strings here — expect '5432'
+    # Note: DatabaseSettings reads env() directly, which returns
+    # strings here — expect '5432'
     assert ds.port == "5432"
     assert ds.name == "spartan"
 
 
 def test_handlers_singleton_and_handler_configs(monkeypatch):
-    mapping = {"APP_NAME": "appx", "LOG_LEVEL": "WARN", "LOG_FILE": "/tmp/appx.log"}
+    mapping = {
+        "APP_NAME": "appx",
+        "LOG_LEVEL": "WARN",
+        "LOG_FILE": "/tmp/appx.log",
+    }
     monkeypatch.setattr("app.helpers.environment.env", make_env(mapping))
 
-    # Reload logging config module to re-create singleton with patched env
+    # Reload logging config module to re-create singleton with
+    # patched env
     log_mod = importlib.reload(importlib.import_module("config.logging"))
 
     # handler() convenience should return the pydantic config models
@@ -80,12 +86,20 @@ def test_handlers_singleton_and_handler_configs(monkeypatch):
 
     with pytest.raises(Exception):
         TcpHandlerConfig(
-            class_="x", formatter="json", name="n", level="INFO", host="h", port=70000
+            class_="x",
+            formatter="json",
+            name="n",
+            level="INFO",
+            host="h",
+            port=70000,
         )
 
 
 def test_filehandler_pydantic_serialization_and_validation(monkeypatch):
-    """Ensure json_deserializer attribute exists but is excluded from model dumps and invalid values raise."""
+    """
+    Ensure json_deserializer attribute exists but is excluded from model
+    dumps and invalid values raise.
+    """
 
     mapping = {"APP_NAME": "appx", "LOG_LEVEL": "WARN", "LOG_FILE": "/tmp/appx.log"}
     monkeypatch.setattr("app.helpers.environment.env", make_env(mapping))

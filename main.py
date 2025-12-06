@@ -1,6 +1,8 @@
 import functions_framework
 from cloudevents.http.event import CloudEvent
+
 from app.helpers.logger import get_logger
+
 
 logger = get_logger("spartan.lazaro.hello_pubsub")
 

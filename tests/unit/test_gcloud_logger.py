@@ -100,7 +100,10 @@ def test_gcloud_sampling_blocks_logging(monkeypatch):
 
 
 def test_gcloud_exception_logging_and_fallback(monkeypatch):
-    """exception() should call logger.exception and fallback path should set a fallback logger when handler setup fails."""
+    """
+    exception() should call logger.exception and fallback path should set
+    a fallback logger when handler setup fails.
+    """
     import sys
 
     sys.modules["google.cloud.logging"] = SimpleNamespace(

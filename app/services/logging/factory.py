@@ -10,7 +10,10 @@ from .base import BaseLogger
 
 
 class LoggerFactory:
-    """Factory class for creating different types of loggers with lazy loading support."""
+    """
+    Factory class for creating different types of loggers with lazy
+    loading support.
+    """
 
     # Cache for lazy-loaded logger classes
     _lazy_logger_cache: Dict[str, Type[BaseLogger]] = {}
@@ -60,7 +63,10 @@ class LoggerFactory:
 
     @classmethod
     def _resolve_logger_type(cls, logger_type: Optional[str]) -> str:
-        """Resolve the logger type from parameters or environment variables with smart fallback."""
+        """
+        Resolve the logger type from parameters or environment variables
+        with smart fallback.
+        """
         resolved_type = (
             logger_type or env("LOGGER_TYPE", env("LOG_CHANNEL", "file"))
         ).lower()
@@ -71,7 +77,8 @@ class LoggerFactory:
             app_env = env("APP_ENVIRONMENT", "").lower()
             if app_env in ["local", "development", "dev"]:
                 print(
-                    f"⚠️  Warning: gcloud logger requested in {app_env} environment. Falling back to 'both' logger."
+                    f"⚠️  Warning: gcloud logger requested in {app_env} "
+                    f"environment. Falling back to 'both' logger."
                 )
                 return "both"
 

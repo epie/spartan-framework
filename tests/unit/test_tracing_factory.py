@@ -31,7 +31,8 @@ def test_tracer_factory_selects_gcloud_when_gcp_env(monkeypatch):
 
     mod_gcloud = importlib.import_module("app.services.tracing.gcloud")
     monkeypatch.setattr(mod_gcloud, "GCP_TRACING_AVAILABLE", True)
-    # Provide a fake trace_v1 with TraceServiceClient constructor (module may not define trace_v1)
+    # Provide a fake trace_v1 with TraceServiceClient constructor
+    # (module may not define trace_v1)
     monkeypatch.setattr(
         mod_gcloud,
         "trace_v1",

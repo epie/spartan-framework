@@ -27,7 +27,7 @@ class FileLogger(BaseLogger):
             service_name, level, log_dir, max_bytes, backup_count
         )
 
-    def _setup_logger(
+    def _setup_logger(  # noqa: C901
         self,
         service_name: str,
         level: str,
@@ -67,13 +67,15 @@ class FileLogger(BaseLogger):
             }
 
             def format(self, record):
-                # Use inspect to find the first frame inside the project, outside the logger package
+                # Use inspect to find the first frame inside the project,
+                # outside the logger package
                 stack = inspect.stack()
                 rel_path = None
                 lineno = None
                 for frame_info in stack:
                     filename = frame_info.filename
-                    # Only consider frames inside the project root and outside the logging-related directories
+                    # Only consider frames inside the project root
+                    # and outside the logging-related directories
                     normalized_path = filename.replace("\\", "/")
                     rel_normalized = normalized_path.replace(
                         self._project_root.replace("\\", "/"), ""

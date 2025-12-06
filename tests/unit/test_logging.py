@@ -56,7 +56,7 @@ def test_stream_logger_format_and_fallback(monkeypatch):
     assert fake.calls[-1][0] == "info"
 
 
-def test_prettify_extra_and_bothlogger_delegation(monkeypatch):
+def test_prettify_extra_and_bothlogger_delegation(monkeypatch):  # noqa: C901
     # Test _prettify_extra behavior directly
     from app.services.logging.both import BothLogger, _prettify_extra
 

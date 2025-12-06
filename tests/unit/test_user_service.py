@@ -10,10 +10,10 @@ class Field:
 
 
 # Patch app.models.user before importing UserService
-import types
-from datetime import datetime
+import types  # noqa: E402
+from datetime import datetime  # noqa: E402
 
-import pytest
+import pytest  # noqa: E402
 
 
 class FakeUser:
@@ -37,21 +37,25 @@ class FakeUser:
 
 fake_user_mod = types.ModuleType("app.models.user")
 fake_user_mod.User = FakeUser
-import sys
+import sys  # noqa: E402
 
 
 sys.modules["app.models.user"] = fake_user_mod
 
-from app.exceptions.user import (
+from app.exceptions.user import (  # noqa: E402
     DuplicateUserError,
     InvalidSortFieldException,
     UserNotFoundException,
 )
-from app.requests.user import UserCreateRequest, UserUpdateRequest
-from app.services.user import UserService
+from app.requests.user import (  # noqa: E402
+    UserCreateRequest,
+    UserUpdateRequest,
+)
+from app.services.user import UserService  # noqa: E402
 
 
-## Removed duplicate FakeUser definition; only the version with class attributes is used
+# Removed duplicate FakeUser definition; only the version with class
+# attributes is used
 
 
 class FakeQuery:
