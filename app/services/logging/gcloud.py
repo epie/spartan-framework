@@ -172,13 +172,22 @@ class GCloudLogger(BaseLogger):
             return
 
         # Create structured log data
-        self._create_structured_log(level, message, **kwargs)
+        structured_data = self._create_structured_log(level, message, **kwargs)
 
         # Log using the appropriate level method
         log_method = getattr(self.logger, level.lower(), self.logger.info)
 
-        # Log the message directly - Cloud Logging handler will handle it
-        log_method(message)
+        # Remove reserved LogRecord fields before passing to logger
+        # to avoid "Attempt to overwrite 'message' in LogRecord" error
+        extra_for_logger = {k: v for k, v in structured_data.items()
+                           if k not in ["message", "asctime", "name", "msg", "args",
+                                       "created", "filename", "funcName", "levelname",
+                                       "levelno", "lineno", "module", "msecs", "pathname",
+                                       "process", "processName", "relativeCreated", "thread",
+                                       "threadName", "exc_info", "exc_text", "stack_info"]}
+
+        # Pass structured data to Cloud Logging handler
+        log_method(message, extra=extra_for_logger)
 
     def info(self, message: str, **kwargs):
         self._log("info", message, **kwargs)
@@ -197,8 +206,19 @@ class GCloudLogger(BaseLogger):
         if not self._should_sample_log():
             return
 
+        # Create structured log data
+        structured_data = self._create_structured_log("ERROR", message, **kwargs)
+
+        # Remove reserved LogRecord fields before passing to logger
+        extra_for_logger = {k: v for k, v in structured_data.items()
+                           if k not in ["message", "asctime", "name", "msg", "args",
+                                       "created", "filename", "funcName", "levelname",
+                                       "levelno", "lineno", "module", "msecs", "pathname",
+                                       "process", "processName", "relativeCreated", "thread",
+                                       "threadName", "exc_info", "exc_text", "stack_info"]}
+
         # Use exception method which includes traceback
-        self.logger.exception(message)
+        self.logger.exception(message, extra=extra_for_logger)
 
     def critical(self, message: str, **kwargs):
         self._log("critical", message, **kwargs)

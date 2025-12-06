@@ -52,9 +52,14 @@ def test_gcloud_happy_path_redaction_and_structured_logging(monkeypatch):
     # Verify the message was logged
     assert level == "info"
     assert message == "hello"
-    # Note: extra is not passed to underlying logger anymore,
-    # structured log is created internally via _create_structured_log
-    assert extra is None
+    # Structured log should have redacted password and preserved safe
+    assert extra is not None
+    assert extra.get("password") == "[REDACTED]"
+    assert extra.get("safe") == "yes"
+    # Environment/version present (not filtered since they're user fields)
+    assert extra.get("environment") == "ci"
+    # Reserved field 'message' should be filtered out to avoid LogRecord conflict
+    assert "message" not in extra
 
 
 def test_gcloud_sampling_blocks_logging(monkeypatch):
@@ -158,6 +163,8 @@ def test_gcloud_exception_logging_and_fallback(monkeypatch):
     level, message, extra = fake.calls[-1]
     assert level == "exception"
     assert message == "err"
-    # Note: extra is not passed to underlying logger anymore,
-    # structured log is created internally via _create_structured_log
-    assert extra is None
+    # Verify token was redacted in structured data
+    assert extra is not None
+    assert extra.get("token") == "[REDACTED]"
+    # Reserved field 'message' should be filtered out
+    assert "message" not in extra
