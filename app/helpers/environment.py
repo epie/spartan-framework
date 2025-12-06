@@ -1,3 +1,4 @@
+import os
 from functools import lru_cache
 from typing import Literal, Optional
 
@@ -6,7 +7,8 @@ from pydantic import ConfigDict, field_validator
 from pydantic_settings import BaseSettings
 
 
-load_dotenv(dotenv_path=".env")
+if os.path.exists(".env"):
+    load_dotenv(dotenv_path=".env")
 
 
 class EnvironmentVariables(BaseSettings):

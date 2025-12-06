@@ -4,11 +4,11 @@ Tests initialization, logging methods, sampling, PII sanitization, and error han
 """
 
 import os
-from unittest.mock import MagicMock, patch
+from unittest.mock import MagicMock
 
 import pytest
 
-from app.services.logging.gcloud import GCloudLogger, GCP_LOGGING_AVAILABLE
+from app.services.logging.gcloud import GCP_LOGGING_AVAILABLE, GCloudLogger
 
 
 def test_gcloud_logger_import_error_when_unavailable(mocker):
@@ -21,14 +21,20 @@ def test_gcloud_logger_import_error_when_unavailable(mocker):
     assert "Google Cloud Logging dependencies not available" in str(exc_info.value)
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_initialization(mocker):
     """Test GCloudLogger initializes with service name, level, and sample rate."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
     mocker.patch("app.services.logging.gcloud.env", return_value="production")
 
     logger = GCloudLogger("my-service", level="DEBUG", sample_rate=0.5)
@@ -39,14 +45,23 @@ def test_gcloud_logger_initialization(mocker):
     assert logger.logger is not None
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_setup_fallback_on_exception(mocker):
     """Test GCloudLogger falls back to standard logging when GCP setup fails."""
     # Mock Client to raise exception
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", side_effect=Exception("GCP error"))
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client",
+        side_effect=Exception("GCP error"),
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -57,16 +72,26 @@ def test_gcloud_logger_setup_fallback_on_exception(mocker):
 
     # Verify fallback occurred
     assert "gcloud_fallback" in logger.logger.name
-    mock_print.assert_any_call("Warning: Failed to setup Google Cloud Logging: GCP error")
+    mock_print.assert_any_call(
+        "Warning: Failed to setup Google Cloud Logging: GCP error"
+    )
     mock_print.assert_any_call("Falling back to standard logging...")
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+
+
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_sanitize_extra_data(mocker):
     """Test _sanitize_extra_data redacts sensitive fields."""
     mocker.patch("app.services.logging.gcloud.gcp_logging.Client")
     mocker.patch("app.services.logging.gcloud.CloudLoggingHandler")
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -89,14 +114,20 @@ def test_gcloud_logger_sanitize_extra_data(mocker):
     assert sanitized["email"] == "john@example.com"
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_sanitize_empty_extra(mocker):
     """Test _sanitize_extra_data handles empty/None extra."""
     mocker.patch("app.services.logging.gcloud.gcp_logging.Client")
     mocker.patch("app.services.logging.gcloud.CloudLoggingHandler")
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -106,14 +137,20 @@ def test_gcloud_logger_sanitize_empty_extra(mocker):
     assert logger._sanitize_extra_data({}) == {}
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_should_sample_log(mocker):
     """Test _should_sample_log respects sample rate."""
     mocker.patch("app.services.logging.gcloud.gcp_logging.Client")
     mocker.patch("app.services.logging.gcloud.CloudLoggingHandler")
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -121,9 +158,14 @@ def test_gcloud_logger_should_sample_log(mocker):
     logger = GCloudLogger("test-service", sample_rate=1.0)
     assert logger._should_sample_log() is True
 
-    # Test with 0% sampling (need to set LOG_SAMPLE_RATE=0 via env since sample_rate=0.0 is falsy)
+    # Test with 0% sampling (need to set LOG_SAMPLE_RATE=0
+    # via env since sample_rate=0.0 is falsy)
     def mock_env_zero(key, default=None):
-        return {"LOG_SAMPLE_RATE": "0.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "0.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env_zero)
     logger = GCloudLogger("test-service")
@@ -131,7 +173,11 @@ def test_gcloud_logger_should_sample_log(mocker):
 
     # Test with 50% sampling (mock random to control)
     def mock_env_half(key, default=None):
-        return {"LOG_SAMPLE_RATE": "0.5", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "0.5",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env_half)
     logger = GCloudLogger("test-service")
@@ -143,14 +189,20 @@ def test_gcloud_logger_should_sample_log(mocker):
     assert logger._should_sample_log() is False
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_get_caller_location(mocker):
     """Test _get_caller_location returns proper location."""
     mocker.patch("app.services.logging.gcloud.gcp_logging.Client")
     mocker.patch("app.services.logging.gcloud.CloudLoggingHandler")
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -164,18 +216,26 @@ def test_gcloud_logger_get_caller_location(mocker):
     assert parts[1].isdigit()
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_get_caller_location_outside_project(mocker):
     """Test _get_caller_location handles frames outside project root."""
     mocker.patch("app.services.logging.gcloud.gcp_logging.Client")
     mocker.patch("app.services.logging.gcloud.CloudLoggingHandler")
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
-    logger = GCloudLogger("test-service")    # Mock inspect.stack to return frame outside project
+    logger = GCloudLogger(
+        "test-service"
+    )  # Mock inspect.stack to return frame outside project
     fake_frame = MagicMock()
     fake_frame.filename = "/external/library/module.py"
     fake_frame.lineno = 42
@@ -188,18 +248,26 @@ def test_gcloud_logger_get_caller_location_outside_project(mocker):
     assert location == "unknown:0"
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_get_caller_location_relpath_error(mocker):
     """Test _get_caller_location handles relpath errors gracefully."""
     mocker.patch("app.services.logging.gcloud.gcp_logging.Client")
     mocker.patch("app.services.logging.gcloud.CloudLoggingHandler")
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
-    logger = GCloudLogger("test-service")    # Mock inspect.stack to return frame inside project
+    logger = GCloudLogger(
+        "test-service"
+    )  # Mock inspect.stack to return frame inside project
     project_root = logger.project_root
     fake_frame = MagicMock()
     fake_frame.filename = os.path.join(project_root, "app", "test.py")
@@ -209,6 +277,7 @@ def test_gcloud_logger_get_caller_location_relpath_error(mocker):
 
     # Mock os.path.relpath to raise ValueError
     original_relpath = os.path.relpath
+
     def mock_relpath(path, start):
         if path == fake_frame.filename:
             raise ValueError("Cannot calculate relative path")
@@ -222,7 +291,9 @@ def test_gcloud_logger_get_caller_location_relpath_error(mocker):
     assert location == "test.py:99"
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_create_structured_log(mocker):
     """Test _create_structured_log creates proper structure."""
     mocker.patch("app.services.logging.gcloud.gcp_logging.Client")
@@ -230,13 +301,19 @@ def test_gcloud_logger_create_structured_log(mocker):
 
     # Mock env to return fixed values
     def mock_env(key, default=None):
-        return {"APP_ENVIRONMENT": "test", "APP_VERSION": "1.0.0", "LOG_SAMPLE_RATE": "1.0"}.get(key, default)
+        return {
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0.0",
+            "LOG_SAMPLE_RATE": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
     logger = GCloudLogger("test-service")
 
-    structured = logger._create_structured_log("INFO", "Test message", extra={"user_id": 123})
+    structured = logger._create_structured_log(
+        "INFO", "Test message", extra={"user_id": 123}
+    )
 
     assert structured["severity"] == "INFO"
     assert structured["service"] == "test-service"
@@ -248,19 +325,31 @@ def test_gcloud_logger_create_structured_log(mocker):
     assert "location" in structured
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_info(mocker):
     """Test info logging method."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
     mock_logger = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
-    mocker.patch("app.services.logging.gcloud.logging.getLogger", return_value=mock_logger)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.logging.getLogger", return_value=mock_logger
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -271,19 +360,31 @@ def test_gcloud_logger_info(mocker):
     assert mock_logger.info.called
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_warning(mocker):
     """Test warning logging method."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
     mock_logger = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
-    mocker.patch("app.services.logging.gcloud.logging.getLogger", return_value=mock_logger)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.logging.getLogger", return_value=mock_logger
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -293,19 +394,31 @@ def test_gcloud_logger_warning(mocker):
     assert mock_logger.warning.called
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_error(mocker):
     """Test error logging method."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
     mock_logger = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
-    mocker.patch("app.services.logging.gcloud.logging.getLogger", return_value=mock_logger)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.logging.getLogger", return_value=mock_logger
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -315,19 +428,31 @@ def test_gcloud_logger_error(mocker):
     assert mock_logger.error.called
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_debug(mocker):
     """Test debug logging method."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
     mock_logger = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
-    mocker.patch("app.services.logging.gcloud.logging.getLogger", return_value=mock_logger)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.logging.getLogger", return_value=mock_logger
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -337,19 +462,31 @@ def test_gcloud_logger_debug(mocker):
     assert mock_logger.debug.called
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_exception(mocker):
     """Test exception logging method."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
     mock_logger = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
-    mocker.patch("app.services.logging.gcloud.logging.getLogger", return_value=mock_logger)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.logging.getLogger", return_value=mock_logger
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -359,19 +496,31 @@ def test_gcloud_logger_exception(mocker):
     assert mock_logger.exception.called
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_critical(mocker):
     """Test critical logging method."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
     mock_logger = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
-    mocker.patch("app.services.logging.gcloud.logging.getLogger", return_value=mock_logger)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.logging.getLogger", return_value=mock_logger
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env)
 
@@ -381,23 +530,39 @@ def test_gcloud_logger_critical(mocker):
     assert mock_logger.critical.called
 
 
-@pytest.mark.skipif(not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed")
+@pytest.mark.skipif(
+    not GCP_LOGGING_AVAILABLE, reason="google-cloud-logging not installed"
+)
 def test_gcloud_logger_sampling_skips_logs(mocker):
     """Test that sampling rate of 0 prevents logs from being written."""
     mock_client = MagicMock()
     mock_handler = MagicMock()
     mock_logger = MagicMock()
 
-    mocker.patch("app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client)
-    mocker.patch("app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler)
-    mocker.patch("app.services.logging.gcloud.logging.getLogger", return_value=mock_logger)
+    mocker.patch(
+        "app.services.logging.gcloud.gcp_logging.Client", return_value=mock_client
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.CloudLoggingHandler", return_value=mock_handler
+    )
+    mocker.patch(
+        "app.services.logging.gcloud.logging.getLogger", return_value=mock_logger
+    )
 
     def mock_env(key, default=None):
-        return {"LOG_SAMPLE_RATE": "1.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "1.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     # Use LOG_SAMPLE_RATE=0.0 via env since sample_rate=0.0 is falsy
     def mock_env_zero(key, default=None):
-        return {"LOG_SAMPLE_RATE": "0.0", "APP_ENVIRONMENT": "test", "APP_VERSION": "1.0"}.get(key, default)
+        return {
+            "LOG_SAMPLE_RATE": "0.0",
+            "APP_ENVIRONMENT": "test",
+            "APP_VERSION": "1.0",
+        }.get(key, default)
 
     mocker.patch("app.services.logging.gcloud.env", side_effect=mock_env_zero)
 

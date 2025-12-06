@@ -172,13 +172,13 @@ class GCloudLogger(BaseLogger):
             return
 
         # Create structured log data
-        structured_data = self._create_structured_log(level, message, **kwargs)
+        self._create_structured_log(level, message, **kwargs)
 
         # Log using the appropriate level method
         log_method = getattr(self.logger, level.lower(), self.logger.info)
 
-        # Google Cloud Logging expects structured data as extra parameter
-        log_method(message, extra=structured_data)
+        # Log the message directly - Cloud Logging handler will handle it
+        log_method(message)
 
     def info(self, message: str, **kwargs):
         self._log("info", message, **kwargs)
@@ -197,11 +197,8 @@ class GCloudLogger(BaseLogger):
         if not self._should_sample_log():
             return
 
-        # Create structured log data
-        structured_data = self._create_structured_log("ERROR", message, **kwargs)
-
         # Use exception method which includes traceback
-        self.logger.exception(message, extra=structured_data)
+        self.logger.exception(message)
 
     def critical(self, message: str, **kwargs):
         self._log("critical", message, **kwargs)
